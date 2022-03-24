@@ -1,0 +1,108 @@
+import React, { useContext, useEffect, useState } from 'react'
+import { userContext } from './userContext';
+
+export const Interval = ({ hour, minute, id }) => {
+
+
+    const { recursesTaked, setRecursesTaked, userName } = useContext(userContext);
+    const [motorcycles, modifyMotorcycles] = useState()
+    const [taked, setTaked] = useState(false)
+    const [color, setColor] = useState('inherit')
+
+    const [recurseInLocalStorage, setRecurseInLocalStorage] = useState();
+
+    const findRecurse = (recurses, idRecurse) => {
+        return recurses.find(recurse => recurse.id === idRecurse)
+    }
+
+    useEffect(() => {
+    
+        const findRecurseTakedInLocalStorage = findRecurse(recursesTaked, id);
+        if (findRecurseTakedInLocalStorage) {
+            setRecurseInLocalStorage(findRecurseTakedInLocalStorage);
+            modifyMotorcycles(findRecurseTakedInLocalStorage.amountAvailable);
+        } else {
+            modifyMotorcycles(8)
+        }
+    }, [id, setRecursesTaked, recursesTaked])
+
+
+    const cleanRecurse = (usuario, recurses) => {
+        return recurses.user.filter( name => name !== usuario)
+    }
+
+    const handleTaked = () => {
+
+        const findUser = (name) => {
+            const exist = recurseInLocalStorage.user.find(usuario => usuario === name)
+            if (exist) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        if ( recurseInLocalStorage && !findUser(userName) ) {
+            handleUntaked()
+        } else {
+            setRecursesTaked({
+                user: [userName],
+                id: id,
+                amountAvailable: (motorcycles - 1)
+            })
+        }
+
+        // if ( recurseInLocalStorage && findUser(userName) ) {
+
+        //     handleUntaked();
+
+        // } else { 
+
+        //     modifyMotorcycles(motorcycles - 1)
+
+        //     const recurseTakedByUser = {
+        //         user: [userName],
+        //         id: id,
+        //         amountAvailable: (motorcycles - 1)
+        //     }
+
+        //     setRecursesTaked([recurseTakedByUser, ...recursesTaked])
+
+        //     setTaked(true);
+        //     setColor('green')
+
+        //     localStorage.setItem('recursesTaked', JSON.stringify([recurseTakedByUser, ...recursesTaked]))
+
+        //     alert('Recurso tomado');
+
+        // }
+    }
+
+    const handleUntaked = () => {
+        
+        const nameFiltred = cleanRecurse(userName, recursesTaked)
+        modifyMotorcycles(motorcycles + 1)
+        setRecursesTaked({...recursesTaked, user: nameFiltred})
+        setColor('inherit')
+        console.log(recurseInLocalStorage)
+        setRecurseInLocalStorage({});
+        //localStorage.setItem('recursesTaked', JSON.stringify(recursesFiltred))
+        alert('Recurso liberado')
+
+    }
+
+    return (
+        <li
+            className='listIntervals__interval'
+            onClick={handleTaked}
+            style={{ backgroundColor: color }}
+        >
+            <b>Hour: </b>
+            {(hour <= 9) ? "0" + hour : hour}
+            :
+            {(minute <= 9) ? "0" + minute : minute}
+            <span> Disponibility of bikes: {motorcycles} </span>
+
+        </li>
+    )
+}
